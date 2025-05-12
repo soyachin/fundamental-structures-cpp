@@ -1,0 +1,21 @@
+
+# Buld files    
+build/
+cmake-build-*/
+
+# CMakeFiles
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Executables
+*.o
+*.out
+*.exe
+*.a
+*.so
+
+.idea/
+.log
+
