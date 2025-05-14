@@ -1,14 +1,15 @@
 #include <iostream>
 #include "include/Hash.h"
+#include <string>
 
 int main() {
     
     Hash<string, int> mihash;
 
-    mihash.insert("Free Tea", 2);
-    mihash.insert("Inka Cola", 3);
+    mihash.insert("Hola", 1);
+    mihash.insert("Chau", 0);
 
-    cout << mihash.get("Inka Cola") << endl;
+    cout << mihash.get("Hola") << endl;
 
     return 0;
 }

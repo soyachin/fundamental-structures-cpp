@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <functional>
 #include <forward_list>
+#include <iostream>
 
 const float MAX_FILL_FACTOR = 0.7;
 
@@ -20,7 +21,7 @@ class Hash {
         TV value;
         size_t hashcode; 
         
-        explicit Bucket(TK k, TV v, size_t h) : key(k), value(v), hashcode(h) {}
+        Bucket(TK k, TV v, size_t h) : key(k), value(v), hashcode(h) {}
         bool operator==(const TK& k) const {return k == key;}
 
     };
@@ -31,11 +32,9 @@ class Hash {
 
     double fill_factor() {return static_cast<double>(size)/capacity;}
 
-    size_t get_hash_code(const TK& key) const {return hash<TK>{}(key);}
-
     void rehash() {
         int new_cap = capacity*2;
-        forward_list<Bucket>* new_hash = forward_list<Bucket>(new_cap);
+        auto new_hash = new forward_list<Bucket>[new_cap]; // ARRAY [capacity];
 
         for (int i = 0; i < capacity; ++i){ // O(n*k)
             for (const auto& bucket : array[i]){
@@ -44,13 +43,15 @@ class Hash {
             }
         }
 
-        array = move(new_hash);
+        delete[] array;
+
+        array = new_hash;
         capacity = new_cap;
 
     }
 
     public:
-        explicit Hash(int _capacity = 10){
+        Hash(int _capacity = 10){
             array = new forward_list<Bucket>[_capacity];
             capacity = _capacity;
             size = 0;
@@ -60,14 +61,14 @@ class Hash {
         void insert(const TK& key, const TV& value){
             if (fill_factor() >= MAX_FILL_FACTOR) rehash();
 
-            size_t h = get_hash_code(key); // hash code
+            size_t h = hash<TK>{}(key); // hash code
             int index = h % capacity;
 
             auto& chain = array[index];
 
             for (auto& bucket : chain) {
                 if (bucket.key == key) {
-                    bucket.value = value; // Behaves like an unordered_map because it updates the            value
+                    bucket.value = value; // Behaves like an unordered_map because it updates the value
                     return;
                 }
             }
@@ -78,24 +79,27 @@ class Hash {
         }
 
 
-        TV* get(const TK& key) const {
-            int h = get_hash_code(key);
+        TV get(const TK& key) const {
+            size_t h = hash<TK>{}(key); // hash code
             int index = h % capacity;
+
             auto& chain = array[index];
 
             for (auto& bucket : chain) { // O(1) // Worst O(N)
                 if (bucket.key == key ){
-                    return bucket;
+                    return bucket.value;
                 }
             }
 
-            return TV(0);
+            cout << "Not found" << endl; 
+
+            return TV{};
 
         }
 
 
         bool remove(const TK& key) {
-            int h = get_hash_code(key);
+            size_t h = hash<TK>{}(key);
             int index = h % capacity;
             auto& chain = array[index];
             for (auto& bucket : chain) { // O(1) , Worst O(n)
